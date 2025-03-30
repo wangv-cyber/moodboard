@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Your Mood Board</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Create Your Mood Board</h1>
+        
+        <!-- 搜索栏和收藏按钮 -->
+        <div class="header-actions">
+            <form id="text-form">
+                <input type="text" id="text-input" placeholder="Enter your mood description" required>
+                <button type="submit">Submit</button>
+            </form>
+            <a href="/vibe-studio" class="favorites-btn">
+                <span class="heart-icon">♥</span>
+                My Favorites
+            </a>
+        </div>
+
+        <!-- 标签区域 -->
+        <div id="tagsContainer">
+            <div class="tags-section">
+                <h3>keywords</h3>
+                <div id="keywords" class="tags-group"></div>
+            </div>
+            <div class="tags-section">
+                <h3>sentiment</h3>
+                <div id="sentiment" class="tags-group">
+                    <!-- 情绪标签和滑块会通过 JavaScript 动态添加在这里 -->
+                </div>
+            </div>
+            <div class="tags-section">
+                <h3>Selected Tags</h3>
+                <div id="selected-tags" class="tags-group"></div>
+            </div>
+        </div>
+
+        <!-- 修改 mood-controls 部分的代码 -->
+        <div class="mood-controls">
+            <!-- 左侧颜色选择器 -->
+            <div class="color-picker-container">
+                <h3>Select Color</h3>
+                <div class="color-section">
+                    <div id="color-picker-wrapper">
+                        <!-- 自定义的颜色选择界面 -->
+                        <div class="custom-color-picker" id="custom-picker">
+                            <div class="color-preview empty"></div>
+                            <span>Choose a color</span>
+                        </div>
+                        
+                        <!-- 隐藏的原生选择器 -->
+                        <input type="color" id="main-color-picker" class="color-picker-hidden" data-selected="false">
+                    </div>
+                </div>
+            </div>
+
+            <!-- 右侧字体选择器 -->
+            <div class="font-picker-container">
+                <h3>Select Font</h3>
+                <div class="font-section">
+                    <div id="font-picker-wrapper">
+                        <select id="font-style-selector" class="font-selector">
+                            <option value="">Choose a font style...</option>
+                            <option value="playful">Playful</option>
+                            <option value="elegant">Elegant</option>
+                            <option value="modern">Modern</option>
+                            <option value="bold">Bold</option>
+                            <option value="creative">Creative</option>
+                        </select>
+                        <!-- 预览文本区域 -->
+                        <div class="font-preview-container">
+                            <p id="font-preview">The quick brown fox jumps over the lazy dog</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="loading" style="display: none;">Loading...</div>
+        
+        <!-- 图片操作按钮区域 -->
+        <div class="image-actions">
+            <button id="add-to-favorites" class="action-button">Add to Vibe Studio</button>
+        </div>
+
+        <!-- 修改图片展示区域的结构 -->
+        <div class="results-container">
+            <!-- 左侧：原有的图片展示区域 -->
+            <div id="image-container" class="image-results">
+                <!-- 原有的图片结果会在这里显示 -->
+            </div>
+            
+            <!-- 右侧：Typography Gallery -->
+            <div id="typography-gallery" class="typography-results">
+                <h3>Typography Gallery</h3>
+                <!-- 字体图片结果会在这里显示 -->
+            </div>
+        </div>
+        
+        <!-- 添加 lightbox 结构 -->
+        <div id="lightbox" class="lightbox">
+            <span class="close">&times;</span>
+            <img id="lightbox-img" class="lightbox-content">
+        </div>
+    </div>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <style>
+    /* 统一容器样式 */
+    .mood-controls {
+        display: flex;
+        justify-content: space-between;
+        gap: 20px;
+        margin: 20px 0;
+        width: 100%;
+    }
+
+    /* 统一左右两侧容器样式 */
+    .color-picker-container,
+    .font-picker-container {
+        flex: 1;
+    }
+
+    /* 统一标题样式 */
+    .color-picker-container h3,
+    .font-picker-container h3 {
+        color: #333;
+        font-size: 16px;
+        margin-bottom: 15px;
+        font-weight: normal;
+    }
+
+    /* 统一选择区域样式 */
+    .color-section,
+    .font-section {
+        background-color: rgba(255, 255, 255, 0.9);
+        border-radius: 16px;
+        padding: 20px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.8);
+    }
+
+    /* 统一选择器包装器样式 */
+    #color-picker-wrapper,
+    #font-picker-wrapper {
+        width: 100%;
+    }
+
+    /* 自定义字体选择器样式 */
+    .font-selector {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        border-radius: 8px;
+        background-color: white;
+        font-size: 14px;
+        appearance: none;
+        -webkit-appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23333' d='M6 8L2 4h8z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 15px center;
+        background-size: 12px;
+    }
+
+    .font-selector:focus {
+        outline: none;
+        border-color: var(--primary-purple);
+    }
+
+    /* 确保选择器内容垂直居中 */
+    .custom-color-picker,
+    .custom-font-picker {
+        display: flex;
+        align-items: center;
+        min-height: 48px; /* 统一高度 */
+    }
+
+    .color-picker-hidden {
+        opacity: 0;
+        position: absolute;
+        pointer-events: none;
+    }
+
+    .custom-color-picker {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 10px 16px;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.8);
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .custom-color-picker:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .custom-color-picker .color-preview {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        background-color: white;  /* 默认白色背景 */
+        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .custom-color-picker span {
+        color: #666;
+        font-size: 14px;
+    }
+
+    .selected-color-display {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 10px 16px;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.8);
+    }
+
+    .selected-color-display .color-preview {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .remove-color {
+        background: none;
+        border: none;
+        color: #666;
+        font-size: 18px;
+        cursor: pointer;
+        padding: 0 4px;
+        line-height: 1;
+        transition: color 0.2s;
+    }
+
+    .remove-color:hover {
+        color: #ff4444;
+    }
+
+    /* 未选择颜色时的凹陷效果 */
+    .color-preview.empty {
+        background: #f5f5f5;  /* 浅灰色背景 */
+        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.15);  /* 加深内阴影 */
+        border: 1px solid rgba(0, 0, 0, 0.05);  /* 微妙的边框 */
+    }
+
+    /* 结果容器布局 */
+    .results-container {
+        display: flex;
+        gap: 20px;
+        margin-top: 20px;
+        width: 100%;
+        position: relative;
+    }
+
+    /* 左侧图片展示区域 */
+    .image-results {
+        flex: 2;  /* 占据2/3宽度 */
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 20px;
+    }
+
+    /* 右侧Typography Gallery */
+    .typography-results {
+        flex: 1;  /* 占据1/3宽度 */
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 20px;
+        padding: 0 10px;
+    }
+
+    .typography-results h3 {
+        grid-column: 1 / -1;
+        margin: 0 0 15px 0;
+        font-size: 1.2em;
+        color: #333;
+    }
+
+    .header-actions {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 60px;
+        width: 100%;  /* 添加宽度确保占满容器 */
+    }
+
+    #text-form {
+        flex: 1;
+        margin-right: 20px;
+        display: flex;
+        gap: 20px;
+        min-width: 0;  /* 防止flex项溢出 */
+    }
+
+    #text-input {
+        flex: 1;
+        min-width: 0;  /* 防止输入框溢出 */
+    }
+
+    button[type="submit"] {
+        flex-shrink: 0;  /* 防止按钮被压缩 */
+        padding: 12px 24px;
+        background-color: var(--primary-purple);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        cursor: pointer;
+        font-size: 16px;
+        display: block;  /* 确保按钮显示 */
+        white-space: nowrap;  /* 防止文字换行 */
+    }
+
+    /* Add to Vibe Studio 按钮样式 */
+    .image-actions {
+        display: flex;
+        justify-content: flex-end;
+        margin: 20px 0;
+        width: 100%;
+    }
+
+    .action-button {
+        padding: 12px 24px;
+        background-color: var(--primary-purple);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        cursor: pointer;
+        font-size: 16px;
+        display: block;  /* 确保按钮显示 */
+    }
+
+    /* 预览容器样式 */
+    .font-preview-container {
+        margin-top: 15px;
+        padding: 15px;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        text-align: center;
+    }
+
+    #font-preview {
+        margin: 0;
+        font-size: 16px;
+        color: #333;
+    }
+
+    /* 字体样式 */
+    #font-preview.playful {
+        font-family: 'Comic Sans MS', cursive;
+    }
+
+    #font-preview.elegant {
+        font-family: 'Playfair Display', serif;
+    }
+
+    #font-preview.modern {
+        font-family: 'Helvetica Neue', sans-serif;
+    }
+
+    #font-preview.bold {
+        font-family: 'Montserrat', sans-serif;
+        font-weight: bold;
+    }
+
+    #font-preview.creative {
+        font-family: 'Brush Script MT', cursive;
+    }
+
+    /* 确保字体样式类正确定义 */
+    .font-playful {
+        font-family: 'Comic Sans MS', cursive !important;
+    }
+
+    .font-elegant {
+        font-family: 'Playfair Display', serif !important;
+    }
+
+    .font-modern {
+        font-family: 'Helvetica Neue', sans-serif !important;
+    }
+
+    .font-bold {
+        font-family: 'Montserrat', sans-serif !important;
+        font-weight: bold;
+    }
+
+    .font-creative {
+        font-family: 'Brush Script MT', cursive !important;
+    }
+
+    /* 预览区域基本样式 */
+    .font-preview {
+        margin-top: 15px;
+        padding: 15px;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        font-size: 16px;
+        color: #333;
+        text-align: center;
+    }
+    </style>
+</body>
+</html>
