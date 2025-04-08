@@ -18,8 +18,14 @@ Moodbored 并非商业交付型项目，而是一次关于“情绪 - 语言 - �
 
 - 后端：Flask (Python)
 - 前端：HTML5, CSS3, JavaScript
-- API：HuggingFace (情感分析), Pexels (图片资源)
-
+- API：HuggingFace, Pexels
+-情绪分析模型：distilbert-base-uncased-finetuned-sst-2
+社科选型：
+- Ekman的基础情绪理论
+- 社会情绪的研究
+- 认知评价理论
+- 自我意识情绪理论
+  
 ## 安装说明
 
 1. 克隆项目到本地：
@@ -102,6 +108,8 @@ moodbored/
 - 缺乏正式的数据库或身份管理机制，仅用于原型展示  
 - 前端 UI 构建仍处于原始阶段，主要服务逻辑验证
 - Typography Gallery仍存在一定的调用问题，正在修复中
+- 正在寻找用K-means替代avg_color进行色彩分析的方法
+
 - 另外，如果你注意到了代码中bored和正式表述board的区分，没关系，那是我立项之初保留的谐音梗
 
 ## 📌 License
