@@ -20,6 +20,7 @@ Moodbored 并非商业交付型项目，而是一次关于“情绪 - 语言 - �
 - 前端：HTML5, CSS3, JavaScript
 - API：HuggingFace, Pexels
 -情绪分析模型：distilbert-base-uncased-finetuned-sst-2
+
 社科选型：
 - Ekman的基础情绪理论
 - 社会情绪的研究
